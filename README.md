@@ -163,6 +163,89 @@ Ejemplo de salida esperada:
   |  |--fgt-lab
 ```
 
+## Credenciales: Variables de Entorno o Ansible Vault
+
+No escribas passwords reales directamente en:
+
+```text
+inventories/lab/hosts.yml
+inventories/lab/group_vars/fortigates.yml
+```
+
+Este proyecto permite dos formas simples de manejar credenciales.
+
+### Opcion A: Variables de entorno
+
+Esta opcion es practica para laboratorio o pruebas rapidas.
+
+El inventario `inventories/lab/hosts.yml` ya esta preparado para leer usuario y password desde variables de entorno:
+
+```yaml
+ansible_user: "{{ lookup('env', 'FORTIGATE_USERNAME') | default('admin', true) }}"
+ansible_password: "{{ lookup('env', 'FORTIGATE_PASSWORD') }}"
+```
+
+Desde WSL/Linux:
+
+```bash
+export FORTIGATE_USERNAME="admin"
+export FORTIGATE_PASSWORD="change-me"
+ansible-playbook playbooks/backup.yml
+```
+
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ export FORTIGATE_USERNAME="admin"
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ export FORTIGATE_PASSWORD="change-me"
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-playbook playbooks/backup.yml
+```
+
+Si cierras la terminal, esas variables desaparecen. Por eso no quedan guardadas en Git.
+
+### Opcion B: Ansible Vault
+
+Esta opcion es mejor si vas a reutilizar el proyecto, compartirlo con un equipo o guardar credenciales cifradas.
+
+Crea un archivo cifrado:
+
+```bash
+ansible-vault create inventories/lab/group_vars/vault.yml
+```
+
+Dentro del archivo agrega variables como estas:
+
+```yaml
+vault_fortigate_username: admin
+vault_fortigate_password: change-me
+```
+
+Luego puedes modificar `inventories/lab/hosts.yml` para usar esas variables:
+
+```yaml
+ansible_user: "{{ vault_fortigate_username }}"
+ansible_password: "{{ vault_fortigate_password }}"
+```
+
+Ejecuta un playbook pidiendo la clave del Vault:
+
+```bash
+ansible-playbook playbooks/backup.yml --ask-vault-pass
+```
+
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-vault create inventories/lab/group_vars/vault.yml
+New Vault password:
+Confirm New Vault password:
+
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-playbook playbooks/site.yml --ask-vault-pass
+Vault password:
+```
+
+El archivo `vault.yml` esta excluido en `.gitignore`, asi que no se subira al repositorio por accidente. Si tu equipo decide versionar archivos Vault cifrados, cambia esa regla conscientemente y nunca subas la clave del Vault.
+
 ## Uso
 
 Todos los comandos se ejecutan desde la raiz del proyecto:
