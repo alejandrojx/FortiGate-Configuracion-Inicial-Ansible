@@ -2,39 +2,71 @@
 
 Proyecto base para automatizar la configuracion inicial y tareas comunes de FortiGate con Ansible y la coleccion `fortinet.fortios`.
 
-La intención es servir como punto de partida público para laboratorios, documentación técnica y automatización controlada de firewalls FortiGate. Incluye ejemplos seguros para:
+La intencion es servir como punto de partida publico para laboratorios, documentacion tecnica y automatizacion controlada de firewalls FortiGate. Incluye ejemplos seguros para:
 
-- Backup de configuración.
-- Ajustes globales básicos.
+- Backup de configuracion.
+- Ajustes globales basicos.
 - Objetos de firewall.
 - Servicios personalizados.
-- Rutas estáticas.
-- Políticas IPv4.
+- Rutas estaticas.
+- Politicas IPv4.
 - Estructura de inventarios y variables por ambiente.
 
-> Este repositorio usa direcciones de documentación como `192.0.2.10`. No incluye credenciales, configuraciones reales ni información de clientes.
+> Este repositorio usa direcciones de documentacion como `192.0.2.10`. No incluye credenciales, configuraciones reales ni informacion de clientes.
 
 ## Estructura
 
 ```text
 .
-├── ansible.cfg
-├── inventories/
-│   └── lab/
-│       ├── hosts.yml
-│       └── group_vars/
-│           └── fortigates.yml
-├── playbooks/
-│   ├── backup.yml
-│   ├── baseline.yml
-│   ├── firewall_objects.yml
-│   ├── firewall_policies.yml
-│   ├── site.yml
-│   └── static_routes.yml
-├── requirements.yml
-├── requirements.txt
-└── docs/
-    └── SECURITY.md
+|-- ansible.cfg
+|-- inventories/
+|   `-- lab/
+|       |-- hosts.yml
+|       `-- group_vars/
+|           `-- fortigates.yml
+|-- playbooks/
+|   |-- backup.yml
+|   |-- baseline.yml
+|   |-- firewall_objects.yml
+|   |-- firewall_policies.yml
+|   |-- site.yml
+|   `-- static_routes.yml
+|-- requirements.yml
+|-- requirements.txt
+`-- docs/
+    `-- SECURITY.md
+```
+
+## Instalar WSL en Windows
+
+Ansible funciona mejor desde Linux. Si trabajas desde un PC Windows, la forma recomendada es usar WSL con Ubuntu.
+
+Abre PowerShell como administrador y ejecuta:
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Reinicia el PC si Windows lo solicita. Luego abre Ubuntu desde el menu inicio y actualiza paquetes:
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y python3 python3-venv python3-pip git sshpass
+```
+
+Clona el proyecto dentro de WSL:
+
+```bash
+cd ~
+git clone https://github.com/alejandrojx/FortiGate-Configuracion-Inicial-Ansible.git
+cd FortiGate-Configuracion-Inicial-Ansible
+```
+
+Si ya descargaste el proyecto en Windows, tambien puedes entrar desde WSL a una ruta del PC:
+
+```bash
+cd /mnt/c/Users/TU_USUARIO/Documents/FortiGate-Configuracion-Inicial-Ansible
 ```
 
 ## Requisitos
@@ -43,42 +75,37 @@ La intención es servir como punto de partida público para laboratorios, docume
 - Ansible Core.
 - Acceso HTTPS/API al FortiGate.
 - Usuario administrador o token API con permisos suficientes.
+- WSL/Ubuntu si estas trabajando desde Windows.
 
-Instalar dependencias:
+Instalar dependencias desde WSL o Linux:
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ansible-galaxy collection install -r requirements.yml
 ```
 
-En Windows PowerShell:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-ansible-galaxy collection install -r requirements.yml
-```
-
-## Configuración Rápida
-
-Define las credenciales como variables de entorno:
+Ejemplo visto desde un PC con WSL:
 
 ```bash
-export FORTIGATE_USERNAME="admin"
-export FORTIGATE_PASSWORD="change-me"
+alejandro@PC-WINDOWS:~$ cd ~/FortiGate-Configuracion-Inicial-Ansible
+alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ python3 -m venv .venv
+alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ source .venv/bin/activate
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ pip install -r requirements.txt
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-galaxy collection install -r requirements.yml
 ```
 
-En PowerShell:
+## Archivos que normalmente debes modificar
 
-```powershell
-$env:FORTIGATE_USERNAME = "admin"
-$env:FORTIGATE_PASSWORD = "change-me"
+Para adaptar este proyecto a tu firewall o laboratorio, normalmente solo modificas estos archivos:
+
+```text
+inventories/lab/hosts.yml
+inventories/lab/group_vars/fortigates.yml
 ```
 
-Edita el inventario:
+En `inventories/lab/hosts.yml` cambias la IP o FQDN del FortiGate:
 
 ```yaml
 all:
@@ -89,18 +116,79 @@ all:
           ansible_host: 192.0.2.10
 ```
 
-Edita las variables del laboratorio en:
+En `inventories/lab/group_vars/fortigates.yml` cambias hostname, VDOM, objetos, rutas y politicas:
+
+```yaml
+system_global:
+  hostname: FGT-LAB
+  timezone: 04
+  admintimeout: 30
+
+address_objects:
+  - name: LAN_USERS
+    subnet: 10.10.10.0 255.255.255.0
+    comment: Example LAN users subnet
+```
+
+No guardes usuarios, passwords ni tokens reales en esos archivos. Usa variables de entorno o Ansible Vault.
+
+## Configuracion Rapida
+
+Define credenciales como variables de entorno dentro de WSL:
+
+```bash
+export FORTIGATE_USERNAME="admin"
+export FORTIGATE_PASSWORD="change-me"
+```
+
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ export FORTIGATE_USERNAME="admin"
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ export FORTIGATE_PASSWORD="change-me"
+```
+
+Para validar que Ansible lee el inventario:
+
+```bash
+ansible-inventory --graph
+```
+
+Ejemplo de salida esperada:
 
 ```text
-inventories/lab/group_vars/fortigates.yml
+@all:
+  |--@ungrouped:
+  |--@fortigates:
+  |  |--fgt-lab
 ```
 
 ## Uso
 
-Probar conectividad:
+Todos los comandos se ejecutan desde la raiz del proyecto:
 
 ```bash
-ansible fortigates -m fortinet.fortios.fortios_monitor_fact -a "selector=system_status" 
+cd ~/FortiGate-Configuracion-Inicial-Ansible
+source .venv/bin/activate
+```
+
+Probar conectividad contra el FortiGate:
+
+```bash
+ansible fortigates -m fortinet.fortios.fortios_monitor_fact -a "selector=system_status"
+```
+
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible fortigates -m fortinet.fortios.fortios_monitor_fact -a "selector=system_status"
+fgt-lab | SUCCESS => {
+  "changed": false,
+  "meta": {
+    "version": "v7.x.x",
+    "serial": "FGTXXXXXXXXXXXXX"
+  }
+}
 ```
 
 Ejecutar backup:
@@ -109,28 +197,97 @@ Ejecutar backup:
 ansible-playbook playbooks/backup.yml
 ```
 
-Aplicar solo baseline:
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-playbook playbooks/backup.yml
+
+PLAY [Backup FortiGate configuration] *****************************************
+TASK [Create local backup directory] ******************************************
+changed: [fgt-lab -> localhost]
+TASK [Download full configuration backup] *************************************
+ok: [fgt-lab]
+TASK [Save backup locally] ****************************************************
+changed: [fgt-lab -> localhost]
+```
+
+El archivo quedaria en:
+
+```text
+backups/fgt-lab-YYYYMMDD-HHMMSS.conf
+```
+
+Aplicar configuracion inicial:
 
 ```bash
 ansible-playbook playbooks/baseline.yml
 ```
 
-Crear objetos:
+Crear objetos de firewall:
 
 ```bash
 ansible-playbook playbooks/firewall_objects.yml
 ```
 
-Crear rutas:
+Ejemplo de objeto definido en `inventories/lab/group_vars/fortigates.yml`:
+
+```yaml
+address_objects:
+  - name: LAN_USERS
+    subnet: 10.10.10.0 255.255.255.0
+    comment: Example LAN users subnet
+```
+
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-playbook playbooks/firewall_objects.yml
+
+PLAY [Configure FortiGate address and service objects] ************************
+TASK [Configure firewall address objects] *************************************
+changed: [fgt-lab] => (item={'name': 'LAN_USERS', 'subnet': '10.10.10.0 255.255.255.0', 'comment': 'Example LAN users subnet'})
+TASK [Configure custom service objects] ***************************************
+changed: [fgt-lab] => (item={'name': 'TCP_8443', 'tcp_portrange': '8443', 'comment': 'Example custom HTTPS service'})
+```
+
+Crear rutas estaticas:
 
 ```bash
 ansible-playbook playbooks/static_routes.yml
 ```
 
-Crear políticas:
+Ejemplo de ruta definida en `inventories/lab/group_vars/fortigates.yml`:
+
+```yaml
+static_routes:
+  - seq_num: 10
+    dst: 0.0.0.0 0.0.0.0
+    gateway: 192.0.2.1
+    device: port1
+    comment: Example default route
+```
+
+Crear politicas IPv4:
 
 ```bash
 ansible-playbook playbooks/firewall_policies.yml
+```
+
+Ejemplo de politica definida en `inventories/lab/group_vars/fortigates.yml`:
+
+```yaml
+firewall_policies:
+  - policyid: 100
+    name: LAN_to_Internet
+    srcintf: port2
+    dstintf: port1
+    srcaddr: LAN_USERS
+    dstaddr: all
+    service: ALL
+    action: accept
+    schedule: always
+    nat: enable
+    logtraffic: all
 ```
 
 Aplicar todo:
@@ -139,26 +296,39 @@ Aplicar todo:
 ansible-playbook playbooks/site.yml
 ```
 
-## Buenas Prácticas
+Ejemplo visto desde un PC:
+
+```bash
+(.venv) alejandro@PC-WINDOWS:~/FortiGate-Configuracion-Inicial-Ansible$ ansible-playbook playbooks/site.yml
+
+PLAY [Apply FortiGate baseline settings] **************************************
+PLAY [Configure FortiGate address and service objects] ************************
+PLAY [Configure FortiGate static routes] **************************************
+PLAY [Configure FortiGate firewall policies] **********************************
+PLAY RECAP ********************************************************************
+fgt-lab : ok=8 changed=4 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
+```
+
+## Buenas Practicas
 
 - Ejecuta primero en laboratorio o en un VDOM de pruebas.
-- Versiona cambios pequeños y revisables.
+- Versiona cambios pequenos y revisables.
 - Usa Ansible Vault o secretos de CI/CD para credenciales.
-- Mantén los backups fuera del repositorio.
-- Revisa el diff y las variables antes de aplicar a producción.
-- Evita mezclar cambios manuales frecuentes con automatización sin documentarlos.
+- Manten los backups fuera del repositorio.
+- Revisa las variables antes de aplicar a produccion.
+- Evita mezclar cambios manuales frecuentes con automatizacion sin documentarlos.
 
 ## Ansible vs Terraform para FortiGate
 
-Para operación diaria de FortiGate, Ansible suele ser más flexible:
+Para operacion diaria de FortiGate, Ansible suele ser mas flexible:
 
 - Cambios por lotes.
 - Playbooks por tarea.
 - Plantillas y variables por cliente o sede.
 - Backups y validaciones.
-- Automatización incremental.
+- Automatizacion incremental.
 
-Terraform puede ser útil cuando el objetivo es estado deseado estricto o despliegue repetible de infraestructura, especialmente en cloud. En entornos FortiGate ya existentes, Ansible suele ser más cómodo para automatización operativa.
+Terraform puede ser util cuando el objetivo es estado deseado estricto o despliegue repetible de infraestructura, especialmente en cloud. En entornos FortiGate ya existentes, Ansible suele ser mas comodo para automatizacion operativa.
 
 ## Seguridad
 
@@ -166,4 +336,4 @@ Lee [docs/SECURITY.md](docs/SECURITY.md) antes de adaptar este proyecto a un ent
 
 ## Licencia
 
-MIT. Puedes usar este proyecto como base para laboratorios, documentación, formación o automatización interna.
+MIT. Puedes usar este proyecto como base para laboratorios, documentacion, formacion o automatizacion interna.
