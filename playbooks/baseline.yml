@@ -1,0 +1,16 @@
+---
+- name: Apply FortiGate baseline settings
+  hosts: fortigates
+  gather_facts: false
+  collections:
+    - fortinet.fortios
+
+  tasks:
+    - name: Configure system global settings
+      fortios_system_global:
+        vdom: "{{ vdom }}"
+        system_global:
+          hostname: "{{ system_global.hostname }}"
+          timezone: "{{ system_global.timezone }}"
+          admintimeout: "{{ system_global.admintimeout }}"
+

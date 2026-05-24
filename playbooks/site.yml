@@ -1,0 +1,13 @@
+---
+- name: Apply complete FortiGate baseline
+  ansible.builtin.import_playbook: baseline.yml
+
+- name: Configure firewall objects
+  ansible.builtin.import_playbook: firewall_objects.yml
+
+- name: Configure static routes
+  ansible.builtin.import_playbook: static_routes.yml
+
+- name: Configure firewall policies
+  ansible.builtin.import_playbook: firewall_policies.yml
+

@@ -1,0 +1,28 @@
+---
+- name: Configure FortiGate address and service objects
+  hosts: fortigates
+  gather_facts: false
+  collections:
+    - fortinet.fortios
+
+  tasks:
+    - name: Configure firewall address objects
+      fortios_firewall_address:
+        vdom: "{{ vdom }}"
+        state: present
+        firewall_address:
+          name: "{{ item.name }}"
+          subnet: "{{ item.subnet }}"
+          comment: "{{ item.comment | default(omit) }}"
+      loop: "{{ address_objects }}"
+
+    - name: Configure custom service objects
+      fortios_firewall_service_custom:
+        vdom: "{{ vdom }}"
+        state: present
+        firewall_service_custom:
+          name: "{{ item.name }}"
+          tcp_portrange: "{{ item.tcp_portrange }}"
+          comment: "{{ item.comment | default(omit) }}"
+      loop: "{{ service_objects }}"
+

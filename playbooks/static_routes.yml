@@ -1,0 +1,20 @@
+---
+- name: Configure FortiGate static routes
+  hosts: fortigates
+  gather_facts: false
+  collections:
+    - fortinet.fortios
+
+  tasks:
+    - name: Configure static routes
+      fortios_router_static:
+        vdom: "{{ vdom }}"
+        state: present
+        router_static:
+          seq_num: "{{ item.seq_num }}"
+          dst: "{{ item.dst }}"
+          gateway: "{{ item.gateway }}"
+          device: "{{ item.device }}"
+          comment: "{{ item.comment | default(omit) }}"
+      loop: "{{ static_routes }}"
+

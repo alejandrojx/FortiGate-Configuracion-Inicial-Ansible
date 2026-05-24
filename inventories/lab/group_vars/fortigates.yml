@@ -1,0 +1,42 @@
+---
+fortios_access_token: ""
+vdom: root
+
+system_global:
+  hostname: FGT-LAB
+  timezone: 04
+  admintimeout: 30
+
+address_objects:
+  - name: LAN_USERS
+    subnet: 10.10.10.0 255.255.255.0
+    comment: Example LAN users subnet
+  - name: SERVER_NET
+    subnet: 10.10.20.0 255.255.255.0
+    comment: Example server subnet
+
+service_objects:
+  - name: TCP_8443
+    tcp_portrange: "8443"
+    comment: Example custom HTTPS service
+
+static_routes:
+  - seq_num: 10
+    dst: 0.0.0.0 0.0.0.0
+    gateway: 192.0.2.1
+    device: port1
+    comment: Example default route
+
+firewall_policies:
+  - policyid: 100
+    name: LAN_to_Internet
+    srcintf: port2
+    dstintf: port1
+    srcaddr: LAN_USERS
+    dstaddr: all
+    service: ALL
+    action: accept
+    schedule: always
+    nat: enable
+    logtraffic: all
+

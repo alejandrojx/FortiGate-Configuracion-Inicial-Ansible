@@ -1,0 +1,31 @@
+---
+- name: Configure FortiGate firewall policies
+  hosts: fortigates
+  gather_facts: false
+  collections:
+    - fortinet.fortios
+
+  tasks:
+    - name: Configure IPv4 firewall policies
+      fortios_firewall_policy:
+        vdom: "{{ vdom }}"
+        state: present
+        firewall_policy:
+          policyid: "{{ item.policyid }}"
+          name: "{{ item.name }}"
+          srcintf:
+            - name: "{{ item.srcintf }}"
+          dstintf:
+            - name: "{{ item.dstintf }}"
+          srcaddr:
+            - name: "{{ item.srcaddr }}"
+          dstaddr:
+            - name: "{{ item.dstaddr }}"
+          service:
+            - name: "{{ item.service }}"
+          action: "{{ item.action }}"
+          schedule: "{{ item.schedule }}"
+          nat: "{{ item.nat }}"
+          logtraffic: "{{ item.logtraffic }}"
+      loop: "{{ firewall_policies }}"
+

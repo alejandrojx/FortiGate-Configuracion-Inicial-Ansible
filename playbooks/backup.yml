@@ -1,0 +1,29 @@
+---
+- name: Backup FortiGate configuration
+  hosts: fortigates
+  gather_facts: false
+  collections:
+    - fortinet.fortios
+
+  tasks:
+    - name: Create local backup directory
+      ansible.builtin.file:
+        path: backups
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+
+    - name: Download full configuration backup
+      fortios_monitor_fact:
+        selector: system_config_backup
+        vdom: "{{ vdom }}"
+        params:
+          scope: global
+      register: backup_result
+
+    - name: Save backup locally
+      ansible.builtin.copy:
+        content: "{{ backup_result.meta.raw | default(backup_result.meta) }}"
+        dest: "backups/{{ inventory_hostname }}-{{ now(utc=true, fmt='%Y%m%d-%H%M%S') }}.conf"
+        mode: "0600"
+      delegate_to: localhost

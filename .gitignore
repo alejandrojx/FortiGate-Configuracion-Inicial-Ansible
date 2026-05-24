@@ -1,0 +1,14 @@
+.env
+*.retry
+*.log
+*.bak
+*.backup
+backups/
+outputs/
+vault.yml
+vault*.yml
+*.vault.yml
+__pycache__/
+.venv/
+.pytest_cache/
+
