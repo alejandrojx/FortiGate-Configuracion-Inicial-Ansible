@@ -1,6 +1,6 @@
-# FortiGate Ansible Baseline
+# FortiGate Configuracion Inicial - Ansible
 
-Proyecto base para automatizar configuraciones comunes de FortiGate con Ansible y la colección `fortinet.fortios`.
+Proyecto base para automatizar la configuracion inicial y tareas comunes de FortiGate con Ansible y la coleccion `fortinet.fortios`.
 
 La intención es servir como punto de partida público para laboratorios, documentación técnica y automatización controlada de firewalls FortiGate. Incluye ejemplos seguros para:
 
@@ -167,4 +167,3 @@ Lee [docs/SECURITY.md](docs/SECURITY.md) antes de adaptar este proyecto a un ent
 ## Licencia
 
 MIT. Puedes usar este proyecto como base para laboratorios, documentación, formación o automatización interna.
-
